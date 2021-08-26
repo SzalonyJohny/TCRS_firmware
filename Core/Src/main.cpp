@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,6 +28,9 @@
 #include <../st7735/st7735.h>
 #include "../st7735/fonts.h"
 #include "../st7735/testimg.h"
+
+#include "sd_saver_task.hpp"
+#include "display_task.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +49,8 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+SD_HandleTypeDef hsd;
+
 SPI_HandleTypeDef hspi1;
 
 /* Definitions for defaultTask */
@@ -64,7 +70,19 @@ const osThreadAttr_t display_task_attributes = {
   .cb_size = sizeof(display_task_ControlBlock),
   .stack_mem = &display_task_Buffer[0],
   .stack_size = sizeof(display_task_Buffer),
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
+};
+/* Definitions for sd_saver_task */
+osThreadId_t sd_saver_taskHandle;
+uint32_t sd_saver_task_Buffer[ 1024 ];
+osStaticThreadDef_t sd_saver_task_ControlBlock;
+const osThreadAttr_t sd_saver_task_attributes = {
+  .name = "sd_saver_task",
+  .cb_mem = &sd_saver_task_ControlBlock,
+  .cb_size = sizeof(sd_saver_task_ControlBlock),
+  .stack_mem = &sd_saver_task_Buffer[0],
+  .stack_size = sizeof(sd_saver_task_Buffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
 
@@ -74,8 +92,10 @@ const osThreadAttr_t display_task_attributes = {
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_SDIO_SD_Init(void);
 void StartDefaultTask(void *argument);
-void start_display_task(void *argument);
+extern void start_display_task(void *argument);
+extern void start_sd_saver_task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -115,6 +135,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
+  MX_SDIO_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   ST7735_Init();
   /* USER CODE END 2 */
@@ -144,6 +166,9 @@ int main(void)
 
   /* creation of display_task */
   display_taskHandle = osThreadNew(start_display_task, NULL, &display_task_attributes);
+
+  /* creation of sd_saver_task */
+  sd_saver_taskHandle = osThreadNew(start_sd_saver_task, NULL, &sd_saver_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -194,7 +219,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 100;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 5;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -212,6 +237,34 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief SDIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SDIO_SD_Init(void)
+{
+
+  /* USER CODE BEGIN SDIO_Init 0 */
+
+  /* USER CODE END SDIO_Init 0 */
+
+  /* USER CODE BEGIN SDIO_Init 1 */
+
+  /* USER CODE END SDIO_Init 1 */
+  hsd.Instance = SDIO;
+  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+  hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd.Init.ClockDiv = 0;
+  /* USER CODE BEGIN SDIO_Init 2 */
+
+  /* USER CODE END SDIO_Init 2 */
+
 }
 
 /**
@@ -262,6 +315,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -285,6 +339,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : EN_1V8_Pin */
+  GPIO_InitStruct.Pin = EN_1V8_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(EN_1V8_GPIO_Port, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
@@ -304,88 +364,10 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(100);
+    osDelay(1000);
     HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
   }
   /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_start_display_task */
-/**
-* @brief Function implementing the display_task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_start_display_task */
-void start_display_task(void *argument)
-{
-  /* USER CODE BEGIN start_display_task */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1000);
-
-
-	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-	osDelay(500);
-	// Check border
-	ST7735_FillScreen(ST7735_BLACK);
-
-	for(int x = 0; x < ST7735_WIDTH; x++) {
-		ST7735_DrawPixel(x, 0, ST7735_RED);
-		ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
-	}
-
-	for(int y = 0; y < ST7735_HEIGHT; y++) {
-		ST7735_DrawPixel(0, y, ST7735_RED);
-		ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
-	}
-
-	osDelay(3000);
-
-	// Check fonts
-	ST7735_FillScreen(ST7735_BLACK);
-	ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
-	ST7735_WriteString(0, 3*10, "Font_11x18, green, lorem ipsum", Font_11x18, ST7735_GREEN, ST7735_BLACK);
-	ST7735_WriteString(0, 3*10+3*18, "Font_16x26", Font_16x26, ST7735_BLUE, ST7735_BLACK);
-	osDelay(1000);
-
-	// Check colors
-	ST7735_FillScreen(ST7735_BLACK);
-	ST7735_WriteString(0, 0, "BLACK", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_BLUE);
-	ST7735_WriteString(0, 0, "BLUE", Font_11x18, ST7735_BLACK, ST7735_BLUE);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_RED);
-	ST7735_WriteString(0, 0, "RED", Font_11x18, ST7735_BLACK, ST7735_RED);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_GREEN);
-	ST7735_WriteString(0, 0, "GREEN", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_CYAN);
-	ST7735_WriteString(0, 0, "CYAN", Font_11x18, ST7735_BLACK, ST7735_CYAN);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_MAGENTA);
-	ST7735_WriteString(0, 0, "MAGENTA", Font_11x18, ST7735_BLACK, ST7735_MAGENTA);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_YELLOW);
-	ST7735_WriteString(0, 0, "YELLOW", Font_11x18, ST7735_BLACK, ST7735_YELLOW);
-	osDelay(200);
-
-	ST7735_FillScreen(ST7735_WHITE);
-	ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
-	osDelay(200);
-
-
-  }
-  /* USER CODE END start_display_task */
 }
 
  /**

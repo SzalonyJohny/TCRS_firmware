@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define DISPLAY_RESET_GPIO_Port GPIOB
 #define DISPLAY_BACKLIGHT_Pin GPIO_PIN_2
 #define DISPLAY_BACKLIGHT_GPIO_Port GPIOB
+#define EN_1V8_Pin GPIO_PIN_12
+#define EN_1V8_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

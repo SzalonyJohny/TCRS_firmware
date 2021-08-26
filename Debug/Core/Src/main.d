@@ -39,7 +39,8 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Core/Inc/../st7735/st7735.h ../Core/Inc/../st7735/fonts.h \
- ../Core/Src/../st7735/fonts.h ../Core/Src/../st7735/testimg.h
+ ../Core/Src/../st7735/fonts.h ../Core/Src/../st7735/testimg.h \
+ ../Core/Inc/sd_saver_task.hpp ../Core/Inc/display_task.hpp
 
 ../Core/Inc/main.h:
 
@@ -128,3 +129,7 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 ../Core/Src/../st7735/fonts.h:
 
 ../Core/Src/../st7735/testimg.h:
+
+../Core/Inc/sd_saver_task.hpp:
+
+../Core/Inc/display_task.hpp:
