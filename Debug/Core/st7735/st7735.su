@@ -1,15 +1,15 @@
-st7735.c:86:13:ST7735_Select	8	static
-st7735.c:90:6:ST7735_Unselect	8	static
-st7735.c:94:13:ST7735_Reset	8	static
-st7735.c:100:13:ST7735_WriteCommand	16	static
-st7735.c:105:13:ST7735_WriteData	16	static
-st7735.c:110:13:ST7735_ExecuteCommandList	24	static
-st7735.c:136:13:ST7735_SetAddressWindow	32	static
-st7735.c:152:6:ST7735_Init	8	static
-st7735.c:161:6:ST7735_DrawPixel	24	static
-st7735.c:174:13:ST7735_WriteChar	48	static
-st7735.c:210:6:ST7735_WriteString	32	static
-st7735.c:236:6:ST7735_FillRectangle	32	static
-st7735.c:256:6:ST7735_FillScreen	24	static
-st7735.c:260:6:ST7735_DrawImage	24	static
-st7735.c:271:6:ST7735_InvertColors	16	static
+st7735.cpp:86:13:void ST7735_Select()	8	static
+st7735.cpp:90:6:void ST7735_Unselect()	8	static
+st7735.cpp:94:13:void ST7735_Reset()	8	static
+st7735.cpp:100:13:void ST7735_WriteCommand(uint8_t)	16	static
+st7735.cpp:105:13:void ST7735_WriteData(uint8_t*, size_t)	16	static
+st7735.cpp:110:13:void ST7735_ExecuteCommandList(const uint8_t*)	24	static
+st7735.cpp:136:13:void ST7735_SetAddressWindow(uint8_t, uint8_t, uint8_t, uint8_t)	32	static
+st7735.cpp:152:6:void ST7735_Init()	8	static
+st7735.cpp:161:6:void ST7735_DrawPixel(uint16_t, uint16_t, uint16_t)	24	static
+st7735.cpp:174:13:void ST7735_WriteChar(uint16_t, uint16_t, char, FontDef, uint16_t, uint16_t)	48	static
+st7735.cpp:210:6:void ST7735_WriteString(uint16_t, uint16_t, const char*, FontDef, uint16_t, uint16_t)	32	static
+st7735.cpp:236:6:void ST7735_FillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t)	32	static
+st7735.cpp:256:6:void ST7735_FillScreen(uint16_t)	24	static
+st7735.cpp:260:6:void ST7735_DrawImage(uint16_t, uint16_t, uint16_t, uint16_t, const uint16_t*)	24	static
+st7735.cpp:271:6:void ST7735_InvertColors(bool)	16	static

@@ -1,6 +1,8 @@
-main.c:69:5:main	32	static
-main.c:172:6:SystemClock_Config	88	static
-main.c:217:13:MX_SPI1_Init	8	static
-main.c:255:13:MX_GPIO_Init	40	static
-main.c:297:6:HAL_TIM_PeriodElapsedCallback	16	static
-main.c:314:6:Error_Handler	4	static,ignoring_inline_asm
+main.cpp:93:5:int main()	8	static
+main.cpp:177:6:void SystemClock_Config()	88	static
+main.cpp:222:13:void MX_SPI1_Init()	8	static
+main.cpp:260:13:void MX_GPIO_Init()	40	static
+main.cpp:301:6:void StartDefaultTask(void*)	16	static
+main.cpp:320:6:void start_display_task(void*)	40	static
+main.cpp:399:6:void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef*)	16	static
+main.cpp:416:6:void Error_Handler()	4	static,ignoring_inline_asm

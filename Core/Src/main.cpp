@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -29,6 +30,7 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -45,6 +47,25 @@
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for display_task */
+osThreadId_t display_taskHandle;
+uint32_t display_task_Buffer[ 1024 ];
+osStaticThreadDef_t display_task_ControlBlock;
+const osThreadAttr_t display_task_attributes = {
+  .name = "display_task",
+  .cb_mem = &display_task_ControlBlock,
+  .cb_size = sizeof(display_task_ControlBlock),
+  .stack_mem = &display_task_Buffer[0],
+  .stack_size = sizeof(display_task_Buffer),
+  .priority = (osPriority_t) osPriorityBelowNormal,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -53,6 +74,9 @@ SPI_HandleTypeDef hspi1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+void StartDefaultTask(void *argument);
+void start_display_task(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -95,6 +119,44 @@ int main(void)
   ST7735_Init();
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of display_task */
+  display_taskHandle = osThreadNew(start_display_task, NULL, &display_task_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -102,63 +164,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-		HAL_Delay(500);
-		// Check border
-		ST7735_FillScreen(ST7735_BLACK);
-
-		for(int x = 0; x < ST7735_WIDTH; x++) {
-			ST7735_DrawPixel(x, 0, ST7735_RED);
-			ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
-		}
-
-		for(int y = 0; y < ST7735_HEIGHT; y++) {
-			ST7735_DrawPixel(0, y, ST7735_RED);
-			ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
-		}
-
-		HAL_Delay(3000);
-
-		// Check fonts
-		ST7735_FillScreen(ST7735_BLACK);
-		ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
-		ST7735_WriteString(0, 3*10, "Font_11x18, green, lorem ipsum", Font_11x18, ST7735_GREEN, ST7735_BLACK);
-		ST7735_WriteString(0, 3*10+3*18, "Font_16x26", Font_16x26, ST7735_BLUE, ST7735_BLACK);
-		HAL_Delay(1000);
-
-		// Check colors
-		ST7735_FillScreen(ST7735_BLACK);
-		ST7735_WriteString(0, 0, "BLACK", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_BLUE);
-		ST7735_WriteString(0, 0, "BLUE", Font_11x18, ST7735_BLACK, ST7735_BLUE);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_RED);
-		ST7735_WriteString(0, 0, "RED", Font_11x18, ST7735_BLACK, ST7735_RED);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_GREEN);
-		ST7735_WriteString(0, 0, "GREEN", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_CYAN);
-		ST7735_WriteString(0, 0, "CYAN", Font_11x18, ST7735_BLACK, ST7735_CYAN);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_MAGENTA);
-		ST7735_WriteString(0, 0, "MAGENTA", Font_11x18, ST7735_BLACK, ST7735_MAGENTA);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_YELLOW);
-		ST7735_WriteString(0, 0, "YELLOW", Font_11x18, ST7735_BLACK, ST7735_YELLOW);
-		HAL_Delay(200);
-
-		ST7735_FillScreen(ST7735_WHITE);
-		ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
-		HAL_Delay(200);
 
 
   }
@@ -232,7 +237,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -285,6 +290,103 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(100);
+    HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_display_task */
+/**
+* @brief Function implementing the display_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_display_task */
+void start_display_task(void *argument)
+{
+  /* USER CODE BEGIN start_display_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1000);
+
+
+	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+	osDelay(500);
+	// Check border
+	ST7735_FillScreen(ST7735_BLACK);
+
+	for(int x = 0; x < ST7735_WIDTH; x++) {
+		ST7735_DrawPixel(x, 0, ST7735_RED);
+		ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
+	}
+
+	for(int y = 0; y < ST7735_HEIGHT; y++) {
+		ST7735_DrawPixel(0, y, ST7735_RED);
+		ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
+	}
+
+	osDelay(3000);
+
+	// Check fonts
+	ST7735_FillScreen(ST7735_BLACK);
+	ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
+	ST7735_WriteString(0, 3*10, "Font_11x18, green, lorem ipsum", Font_11x18, ST7735_GREEN, ST7735_BLACK);
+	ST7735_WriteString(0, 3*10+3*18, "Font_16x26", Font_16x26, ST7735_BLUE, ST7735_BLACK);
+	osDelay(1000);
+
+	// Check colors
+	ST7735_FillScreen(ST7735_BLACK);
+	ST7735_WriteString(0, 0, "BLACK", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_BLUE);
+	ST7735_WriteString(0, 0, "BLUE", Font_11x18, ST7735_BLACK, ST7735_BLUE);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_RED);
+	ST7735_WriteString(0, 0, "RED", Font_11x18, ST7735_BLACK, ST7735_RED);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_GREEN);
+	ST7735_WriteString(0, 0, "GREEN", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_CYAN);
+	ST7735_WriteString(0, 0, "CYAN", Font_11x18, ST7735_BLACK, ST7735_CYAN);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_MAGENTA);
+	ST7735_WriteString(0, 0, "MAGENTA", Font_11x18, ST7735_BLACK, ST7735_MAGENTA);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_YELLOW);
+	ST7735_WriteString(0, 0, "YELLOW", Font_11x18, ST7735_BLACK, ST7735_YELLOW);
+	osDelay(200);
+
+	ST7735_FillScreen(ST7735_WHITE);
+	ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
+	osDelay(200);
+
+
+  }
+  /* USER CODE END start_display_task */
+}
 
  /**
   * @brief  Period elapsed callback in non blocking mode
