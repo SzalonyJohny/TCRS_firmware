@@ -3485,22 +3485,22 @@ LOAD /opt/st/stm32cubeide_1.6.1/plugins/com.st.stm32cube.ide.mcu.externaltools.g
 LOAD /opt/st/stm32cubeide_1.6.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.linux64_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
 LOAD /opt/st/stm32cubeide_1.6.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.linux64_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m+fp/hard/libgcc.a
 
-.debug_info     0x0000000000000000     0xcef3
- .debug_info    0x0000000000000000     0x192c Core/Src/main.o
- .debug_info    0x000000000000192c      0xa74 Core/Src/stm32f4xx_hal_msp.o
- .debug_info    0x00000000000023a0      0xc00 Core/Src/stm32f4xx_hal_timebase_tim.o
- .debug_info    0x0000000000002fa0      0x7f9 Core/Src/stm32f4xx_it.o
- .debug_info    0x0000000000003799      0x5d0 Core/Src/system_stm32f4xx.o
- .debug_info    0x0000000000003d69       0x22 Core/Startup/startup_stm32f411ceux.o
- .debug_info    0x0000000000003d8b      0x1ae Core/st7735/fonts.o
- .debug_info    0x0000000000003f39      0xca3 Core/st7735/st7735.o
- .debug_info    0x0000000000004bdc      0x944 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
- .debug_info    0x0000000000005520      0xe47 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
- .debug_info    0x0000000000006367      0x862 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
- .debug_info    0x0000000000006bc9      0x9be Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
- .debug_info    0x0000000000007587     0x17b8 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
- .debug_info    0x0000000000008d3f     0x2c1a Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
- .debug_info    0x000000000000b959     0x159a Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+.debug_info     0x0000000000000000     0xcef2
+ .debug_info    0x0000000000000000     0x192b Core/Src/main.o
+ .debug_info    0x000000000000192b      0xa74 Core/Src/stm32f4xx_hal_msp.o
+ .debug_info    0x000000000000239f      0xc00 Core/Src/stm32f4xx_hal_timebase_tim.o
+ .debug_info    0x0000000000002f9f      0x7f9 Core/Src/stm32f4xx_it.o
+ .debug_info    0x0000000000003798      0x5d0 Core/Src/system_stm32f4xx.o
+ .debug_info    0x0000000000003d68       0x22 Core/Startup/startup_stm32f411ceux.o
+ .debug_info    0x0000000000003d8a      0x1ae Core/st7735/fonts.o
+ .debug_info    0x0000000000003f38      0xca3 Core/st7735/st7735.o
+ .debug_info    0x0000000000004bdb      0x944 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_info    0x000000000000551f      0xe47 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+ .debug_info    0x0000000000006366      0x862 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+ .debug_info    0x0000000000006bc8      0x9be Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+ .debug_info    0x0000000000007586     0x17b8 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
+ .debug_info    0x0000000000008d3e     0x2c1a Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+ .debug_info    0x000000000000b958     0x159a Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
 
 .debug_abbrev   0x0000000000000000     0x1d5b
  .debug_abbrev  0x0000000000000000      0x2ec Core/Src/main.o
