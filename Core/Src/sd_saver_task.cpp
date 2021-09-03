@@ -7,18 +7,11 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-
 #include <string.h>
 #include <stdio.h>
-
-
 #include "fatfs.h"
 
-
 #include "sd_saver_task.hpp"
-
-
-
 
 
 unsigned int byteswritten = 0;
@@ -56,8 +49,8 @@ FRESULT initFileSystem() {
 
 	res = f_mount(&SDFatFS, SDPath, 0);
 
-		 uint8_t val = BSP_SD_IsDetected();
-		 GPIO_PinState val2 = HAL_GPIO_ReadPin(EN_1V8_GPIO_Port, EN_1V8_Pin);
+    uint8_t val = BSP_SD_IsDetected();
+	GPIO_PinState val2 = HAL_GPIO_ReadPin(EN_1V8_GPIO_Port, EN_1V8_Pin);
 
 	res =  f_open(&SDFile, "t.txt", FA_OPEN_APPEND | FA_WRITE);
 

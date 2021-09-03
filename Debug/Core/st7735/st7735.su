@@ -1,15 +1,15 @@
-st7735.cpp:86:13:void ST7735_Select()	8	static
-st7735.cpp:90:6:void ST7735_Unselect()	8	static
-st7735.cpp:94:13:void ST7735_Reset()	8	static
-st7735.cpp:100:13:void ST7735_WriteCommand(uint8_t)	16	static
-st7735.cpp:105:13:void ST7735_WriteData(uint8_t*, size_t)	16	static
-st7735.cpp:110:13:void ST7735_ExecuteCommandList(const uint8_t*)	24	static
-st7735.cpp:136:13:void ST7735_SetAddressWindow(uint8_t, uint8_t, uint8_t, uint8_t)	32	static
-st7735.cpp:152:6:void ST7735_Init()	8	static
-st7735.cpp:161:6:void ST7735_DrawPixel(uint16_t, uint16_t, uint16_t)	24	static
-st7735.cpp:174:13:void ST7735_WriteChar(uint16_t, uint16_t, char, FontDef, uint16_t, uint16_t)	48	static
-st7735.cpp:210:6:void ST7735_WriteString(uint16_t, uint16_t, const char*, FontDef, uint16_t, uint16_t)	32	static
-st7735.cpp:236:6:void ST7735_FillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t)	32	static
-st7735.cpp:256:6:void ST7735_FillScreen(uint16_t)	24	static
-st7735.cpp:260:6:void ST7735_DrawImage(uint16_t, uint16_t, uint16_t, uint16_t, const uint16_t*)	24	static
-st7735.cpp:271:6:void ST7735_InvertColors(bool)	16	static
+st7735.cpp:89:13:void ST7735_Select()	8	static
+st7735.cpp:93:6:void ST7735_Unselect()	8	static
+st7735.cpp:97:13:void ST7735_Reset()	8	static
+st7735.cpp:103:13:void ST7735_WriteCommand(uint8_t)	16	static
+st7735.cpp:108:13:void ST7735_WriteData(uint8_t*, size_t)	16	static
+st7735.cpp:113:13:void ST7735_ExecuteCommandList(const uint8_t*)	24	static
+st7735.cpp:139:13:void ST7735_SetAddressWindow(uint8_t, uint8_t, uint8_t, uint8_t)	32	static
+st7735.cpp:155:6:void ST7735_Init()	8	static
+st7735.cpp:164:6:void ST7735_DrawPixel(uint16_t, uint16_t, uint16_t)	24	static
+st7735.cpp:177:13:void ST7735_WriteChar(uint16_t, uint16_t, char, FontDef, uint16_t, uint16_t)	48	static
+st7735.cpp:213:6:void ST7735_WriteString(uint16_t, uint16_t, const char*, FontDef, uint16_t, uint16_t)	32	static
+st7735.cpp:239:6:void ST7735_FillRectangle(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t)	32	static
+st7735.cpp:259:6:void ST7735_FillScreen(uint16_t)	24	static
+st7735.cpp:263:6:void ST7735_DrawImage(uint16_t, uint16_t, uint16_t, uint16_t, const uint16_t*)	24	static
+st7735.cpp:274:6:void ST7735_InvertColors(bool)	16	static
