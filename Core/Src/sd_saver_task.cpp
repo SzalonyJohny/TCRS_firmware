@@ -14,48 +14,53 @@
 #include "sd_saver_task.hpp"
 
 
-unsigned int byteswritten = 0;
+
+void start_sd_saver_task([[maybe_unused]]void *argument){
 
 
-
-void start_sd_saver_task(void *argument){
-
-
-	char string_to_save[64];
+	char sd_string_to_save[64] = {0};
+	unsigned int sd_byteswritten = 0;
 
 	unsigned int counter = 0;
 
-	//FATFS_LinkDriver(&SD_Driver, SDPath);
+	init_file_system();
 
-	initFileSystem();
 
 	for(;;){
 
-		auto size = snprintf(string_to_save, 64, "zapisuje dane %d, \n\r", counter++);
-		f_write(&SDFile, string_to_save, size, &byteswritten);
+		auto size = snprintf(sd_string_to_save, 64, "jakies dlugie dane dane dane halo halo %d, \n", counter++);
 
-		f_sync(&SDFile);
+		auto write_status = f_write(&SDFile, sd_string_to_save, size, &sd_byteswritten);
+		auto sync_status = f_sync(&SDFile);
 
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-		osDelay(500);
+		osDelay(100);
+
+		if( FRESULT::FR_OK == write_status && FRESULT::FR_OK == sync_status ){
+			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+		}
+		else {
+			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+		}
 	}
-
 }
 
 
-FRESULT initFileSystem() {
+FRESULT init_file_system() {
 
 	FRESULT res = FRESULT::FR_OK;
 
 	res = f_mount(&SDFatFS, SDPath, 0);
-
-    uint8_t val = BSP_SD_IsDetected();
-	GPIO_PinState val2 = HAL_GPIO_ReadPin(EN_1V8_GPIO_Port, EN_1V8_Pin);
+	if(FRESULT::FR_OK != res){
+		return res;
+	}
 
 	res =  f_open(&SDFile, "t.txt", FA_OPEN_APPEND | FA_WRITE);
-
+	if(FRESULT::FR_OK != res){
+		return res;
+	}
 
 	res = f_lseek(&SDFile, f_size(&SDFile));
+
 
 	return res;
 }

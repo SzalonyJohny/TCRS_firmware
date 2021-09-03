@@ -18,8 +18,7 @@
 #include "../st7735/testimg.h"
 
 
-
-void start_display_task(void *argument){
+void start_display_task([[maybe_unused]]void *argument){
 
 
 	for(;;){

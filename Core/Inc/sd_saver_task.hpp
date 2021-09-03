@@ -9,7 +9,7 @@
 #define INC_SD_SAVER_TASK_HPP_
 
 
-FRESULT initFileSystem();
+FRESULT init_file_system();
 
 
 #endif /* INC_SD_SAVER_TASK_HPP_ */
