@@ -26,16 +26,6 @@ void start_display_task([[maybe_unused]]void *argument){
 
 		ST7735_FillScreen(ST7735_BLACK);
 
-//		for(int x = 0; x < ST7735_WIDTH; x++) {
-//			ST7735_DrawPixel(x, 0, ST7735_RED);
-//			ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
-//		}
-//
-//		for(int y = 0; y < ST7735_HEIGHT; y++) {
-//			ST7735_DrawPixel(0, y, ST7735_RED);
-//			ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
-//		}
-
 		osDelay(300);
 
 		// Check fonts

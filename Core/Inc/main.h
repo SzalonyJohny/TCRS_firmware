@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOA
 #define DISPLAY_CS_Pin GPIO_PIN_4
 #define DISPLAY_CS_GPIO_Port GPIOA
+#define SD_CARD_CMD_Pin GPIO_PIN_6
+#define SD_CARD_CMD_GPIO_Port GPIOA
 #define DISPLAY_COMAND_Pin GPIO_PIN_0
 #define DISPLAY_COMAND_GPIO_Port GPIOB
 #define DISPLAY_RESET_Pin GPIO_PIN_1
@@ -71,6 +73,16 @@ void Error_Handler(void);
 #define DISPLAY_BACKLIGHT_GPIO_Port GPIOB
 #define EN_1V8_Pin GPIO_PIN_12
 #define EN_1V8_GPIO_Port GPIOB
+#define SD_CARD_CK_Pin GPIO_PIN_15
+#define SD_CARD_CK_GPIO_Port GPIOB
+#define SD_CARD_D1_Pin GPIO_PIN_8
+#define SD_CARD_D1_GPIO_Port GPIOA
+#define SD_CARD_D2_Pin GPIO_PIN_9
+#define SD_CARD_D2_GPIO_Port GPIOA
+#define SD_CARD_D0_Pin GPIO_PIN_4
+#define SD_CARD_D0_GPIO_Port GPIOB
+#define SD_CARD_D3_Pin GPIO_PIN_5
+#define SD_CARD_D3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
