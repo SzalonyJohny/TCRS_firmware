@@ -16,6 +16,8 @@
 void start_sensor_task([[maybe_unused]] void *argument){
 
 
+	// Turn on Sensor power supplay rail
+
 
 	for(;;){
 		HAL_GPIO_TogglePin(EN_SENSOR_GPIO_Port, EN_SENSOR_Pin);
