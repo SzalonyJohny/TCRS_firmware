@@ -31,7 +31,7 @@
 
 #include "sd_saver_task.hpp"
 #include "display_task.hpp"
-#include <bit>
+#include "sensor_task.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,9 +65,14 @@ DMA_HandleTypeDef hdma_spi1_tx;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
+uint32_t defaultTaskBuffer[ 128 ];
+osStaticThreadDef_t defaultTaskControlBlock;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .cb_mem = &defaultTaskControlBlock,
+  .cb_size = sizeof(defaultTaskControlBlock),
+  .stack_mem = &defaultTaskBuffer[0],
+  .stack_size = sizeof(defaultTaskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for display_task */
@@ -94,6 +99,18 @@ const osThreadAttr_t sd_saver_task_attributes = {
   .stack_size = sizeof(sd_saver_task_Buffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for sensor_task */
+osThreadId_t sensor_taskHandle;
+uint32_t sensor_task_Buffer[ 2048 ];
+osStaticThreadDef_t sensor_task_ControlBlock;
+const osThreadAttr_t sensor_task_attributes = {
+  .name = "sensor_task",
+  .cb_mem = &sensor_task_ControlBlock,
+  .cb_size = sizeof(sensor_task_ControlBlock),
+  .stack_mem = &sensor_task_Buffer[0],
+  .stack_size = sizeof(sensor_task_Buffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 
 #pragma GCC diagnostic pop
@@ -110,6 +127,7 @@ static void MX_RTC_Init(void);
 void StartDefaultTask(void *argument);
 extern void start_display_task(void *argument);
 extern void start_sd_saver_task(void *argument);
+extern void start_sensor_task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -185,6 +203,9 @@ int main(void)
   /* creation of sd_saver_task */
   sd_saver_taskHandle = osThreadNew(start_sd_saver_task, NULL, &sd_saver_task_attributes);
 
+  /* creation of sensor_task */
+  sensor_taskHandle = osThreadNew(start_sensor_task, NULL, &sensor_task_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -218,7 +239,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
   */
@@ -251,12 +271,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
@@ -432,6 +446,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DISPLAY_COMAND_Pin|DISPLAY_RESET_Pin|DISPLAY_BACKLIGHT_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(EN_SENSOR_GPIO_Port, EN_SENSOR_Pin, GPIO_PIN_SET);
+
   /*Configure GPIO pins : LED1_Pin LED2_Pin DISPLAY_CS_Pin */
   GPIO_InitStruct.Pin = LED1_Pin|LED2_Pin|DISPLAY_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -452,6 +469,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(EN_1V8_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : EN_SENSOR_Pin */
+  GPIO_InitStruct.Pin = EN_SENSOR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(EN_SENSOR_GPIO_Port, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
@@ -471,13 +495,13 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1000);
+    osDelay(2000);
     HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
   }
   /* USER CODE END 5 */
 }
 
- /**
+/**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM11 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment

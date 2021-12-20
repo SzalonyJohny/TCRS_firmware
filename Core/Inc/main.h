@@ -83,6 +83,8 @@ void Error_Handler(void);
 #define SD_CARD_D0_GPIO_Port GPIOB
 #define SD_CARD_D3_Pin GPIO_PIN_5
 #define SD_CARD_D3_GPIO_Port GPIOB
+#define EN_SENSOR_Pin GPIO_PIN_6
+#define EN_SENSOR_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

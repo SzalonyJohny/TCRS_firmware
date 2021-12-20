@@ -23,7 +23,6 @@ void start_display_task([[maybe_unused]]void *argument){
 
 	for(;;){
 
-
 		ST7735_FillScreen(ST7735_BLACK);
 
 		osDelay(300);

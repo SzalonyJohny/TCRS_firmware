@@ -14,17 +14,22 @@
 #include "sd_saver_task.hpp"
 
 
-
 void start_sd_saver_task([[maybe_unused]]void *argument){
 
 	const unsigned int sd_string_to_save_len = 64;
 	char sd_string_to_save[sd_string_to_save_len] = {0};
 	unsigned int sd_byteswritten = 0;
 
-
 	unsigned int counter = 0;
 
-	init_file_system();
+	auto init = init_file_system();
+
+	auto status_lseek = f_lseek(&SDFile, 0);
+
+	char buffer_fom_sd[64] = {0};
+	auto status = f_gets(buffer_fom_sd, 30, &SDFile);
+
+	f_lseek(&SDFile, SDFile.fptr);
 
 
 	for(;;){
@@ -37,6 +42,7 @@ void start_sd_saver_task([[maybe_unused]]void *argument){
 
 		auto sync_status = f_sync(&SDFile);
 
+
 		if( FRESULT::FR_OK == write_status && FRESULT::FR_OK == sync_status ){
 			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 		}
@@ -44,6 +50,7 @@ void start_sd_saver_task([[maybe_unused]]void *argument){
 			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 		}
 
+		counter %= 1000;
 	}
 }
 
@@ -58,7 +65,7 @@ FRESULT init_file_system(){
 		return res;
 	}
 
-	res =  f_open(&SDFile, "d.txt", FA_OPEN_APPEND | FA_WRITE);
+	res =  f_open(&SDFile, "d.txt", FA_OPEN_APPEND | FA_WRITE | FA_READ);
 	if(FRESULT::FR_OK != res){
 		return res;
 	}
