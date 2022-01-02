@@ -85,6 +85,9 @@ void Error_Handler(void);
 #define SD_CARD_D3_GPIO_Port GPIOB
 #define EN_SENSOR_Pin GPIO_PIN_6
 #define EN_SENSOR_GPIO_Port GPIOB
+#define PPG_INT_Pin GPIO_PIN_7
+#define PPG_INT_GPIO_Port GPIOB
+#define PPG_INT_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -94,5 +97,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

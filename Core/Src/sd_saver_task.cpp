@@ -49,7 +49,6 @@ void start_sd_saver_task([[maybe_unused]]void *argument){
 		else {
 			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 		}
-
 		counter %= 1000;
 	}
 }
@@ -58,9 +57,7 @@ void start_sd_saver_task([[maybe_unused]]void *argument){
 
 FRESULT init_file_system(){
 
-	FRESULT res = FRESULT::FR_OK;
-
-	res = f_mount(&SDFatFS, SDPath, 0);
+	FRESULT res =  f_mount(&SDFatFS, SDPath, 0);
 	if(FRESULT::FR_OK != res){
 		return res;
 	}

@@ -24,14 +24,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
-#include <../st7735/st7735.h>
-#include "../st7735/fonts.h"
-#include "../st7735/testimg.h"
 
+#include "ppg_sensor_task.hpp"
 #include "sd_saver_task.hpp"
 #include "display_task.hpp"
-#include "sensor_task.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,18 +38,21 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// to suppress warning form generated code
+#define USE_FULL_ASSERT
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
-// to suppress warning form generated code
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
+
 RTC_HandleTypeDef hrtc;
 
 SD_HandleTypeDef hsd;
@@ -99,21 +98,19 @@ const osThreadAttr_t sd_saver_task_attributes = {
   .stack_size = sizeof(sd_saver_task_Buffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for sensor_task */
-osThreadId_t sensor_taskHandle;
-uint32_t sensor_task_Buffer[ 2048 ];
-osStaticThreadDef_t sensor_task_ControlBlock;
-const osThreadAttr_t sensor_task_attributes = {
-  .name = "sensor_task",
-  .cb_mem = &sensor_task_ControlBlock,
-  .cb_size = sizeof(sensor_task_ControlBlock),
-  .stack_mem = &sensor_task_Buffer[0],
-  .stack_size = sizeof(sensor_task_Buffer),
+/* Definitions for ppg_sensor_task */
+osThreadId_t ppg_sensor_taskHandle;
+uint32_t ppg_sensor_task_Buffer[ 2048 ];
+osStaticThreadDef_t ppg_sensor_task_ControlBlock;
+const osThreadAttr_t ppg_sensor_task_attributes = {
+  .name = "ppg_sensor_task",
+  .cb_mem = &ppg_sensor_task_ControlBlock,
+  .cb_size = sizeof(ppg_sensor_task_ControlBlock),
+  .stack_mem = &ppg_sensor_task_Buffer[0],
+  .stack_size = sizeof(ppg_sensor_task_Buffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
-#pragma GCC diagnostic pop
 
 /* USER CODE END PV */
 
@@ -124,6 +121,7 @@ static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_RTC_Init(void);
+static void MX_I2C1_Init(void);
 void StartDefaultTask(void *argument);
 extern void start_display_task(void *argument);
 extern void start_sd_saver_task(void *argument);
@@ -170,8 +168,8 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
   MX_RTC_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  ST7735_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -203,8 +201,8 @@ int main(void)
   /* creation of sd_saver_task */
   sd_saver_taskHandle = osThreadNew(start_sd_saver_task, NULL, &sd_saver_task_attributes);
 
-  /* creation of sensor_task */
-  sensor_taskHandle = osThreadNew(start_sensor_task, NULL, &sensor_task_attributes);
+  /* creation of ppg_sensor_task */
+  ppg_sensor_taskHandle = osThreadNew(start_sensor_task, NULL, &ppg_sensor_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -274,6 +272,40 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
 }
 
 /**
@@ -476,10 +508,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(EN_SENSOR_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PPG_INT_Pin */
+  GPIO_InitStruct.Pin = PPG_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(PPG_INT_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
-
+#pragma GCC diagnostic pop
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -554,4 +596,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

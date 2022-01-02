@@ -53,6 +53,7 @@ void MemManage_Handler(void);
 void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void DebugMon_Handler(void);
+void EXTI9_5_IRQHandler(void);
 void TIM1_TRG_COM_TIM11_IRQHandler(void);
 void SPI1_IRQHandler(void);
 void SDIO_IRQHandler(void);
@@ -68,5 +69,3 @@ void DMA2_Stream6_IRQHandler(void);
 #endif
 
 #endif /* __STM32F4xx_IT_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
