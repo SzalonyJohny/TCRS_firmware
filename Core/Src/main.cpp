@@ -38,11 +38,11 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-// to suppress warning form generated code
-#define USE_FULL_ASSERT
 
+// to suppress warning form generated code
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -108,7 +108,7 @@ const osThreadAttr_t ppg_sensor_task_attributes = {
   .cb_size = sizeof(ppg_sensor_task_ControlBlock),
   .stack_mem = &ppg_sensor_task_Buffer[0],
   .stack_size = sizeof(ppg_sensor_task_Buffer),
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal1,
 };
 /* USER CODE BEGIN PV */
 
@@ -170,6 +170,10 @@ int main(void)
   MX_RTC_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+
+  // Power on delay
+  HAL_Delay(100);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
