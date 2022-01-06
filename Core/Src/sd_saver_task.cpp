@@ -28,7 +28,7 @@ extern "C"{
 extern osSemaphoreId_t Save_PPG_to_SDHandle;
 extern buffer_saving_semafor_t buffer_saving_semafor;
 
-void start_sd_saver_task([[maybe_unused]] void *argument){
+void start_sd_saver_task( [[maybe_unused]] void *argument){
 
 	const unsigned int sd_string_to_save_len = 1024;
 	char sd_string_to_save[sd_string_to_save_len] = {0};
@@ -48,7 +48,9 @@ void start_sd_saver_task([[maybe_unused]] void *argument){
 
 	for(;;){
 
-		osSemaphoreAcquire(Save_PPG_to_SDHandle, 1);
+		auto semaphore_status = osSemaphoreAcquire(Save_PPG_to_SDHandle, osWaitForever);
+		assert_param(osOK == semaphore_status);
+
 
 		std::size_t start_saving = 0;
 		std::size_t end_saving = 0;
@@ -71,13 +73,14 @@ void start_sd_saver_task([[maybe_unused]] void *argument){
 		std::size_t snprintf_iter = 0;
 
 		for(std::size_t buff_iter = start_saving; buff_iter <= end_saving; buff_iter++){
-			auto res = snprintf( &sd_string_to_save[snprintf_iter], sd_string_to_save_len - snprintf_iter,"%lu, %lu", IrBuffer[buff_iter], RedBuffer[buff_iter]);
+			auto res = snprintf( &sd_string_to_save[snprintf_iter], sd_string_to_save_len - snprintf_iter,"%lu, %lu;", IrBuffer[buff_iter], RedBuffer[buff_iter]);
 			assert_param(-1 != res);
 			snprintf_iter += res;
 		}
 
 		auto res_header = snprintf(sd_string_to_save, sd_string_to_save_len, "zapis bufora \n");
 		assert_param(-1 != res_header);
+		snprintf_iter += res_header;
 
 		auto write_status = f_write(&SDFile, sd_string_to_save, snprintf_iter, &sd_byteswritten);
 		assert_param(FRESULT::FR_OK == write_status);

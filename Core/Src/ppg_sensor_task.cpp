@@ -59,7 +59,13 @@ void start_sensor_task([[maybe_unused]] void *argument){
 													 (BufferHead, (i+1)*MAX30102_SAMPLES_PER_SECOND, i);
 		}
 
+		for(auto save_flag : buffer_saving_semafor.ready_to_save){
+			if(save_flag){
+				osSemaphoreRelease(Save_PPG_to_SDHandle);
+			}
+		}
 
+		// Variable to LCD display
 		IRv = IrBuffer[BufferHead - 10];
 		REDv = RedBuffer[BufferHead - 10];
 

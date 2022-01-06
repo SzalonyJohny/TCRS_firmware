@@ -37,7 +37,7 @@ void start_display_task([[maybe_unused]]void *argument){
 	ST7735_WriteString(0, 3*12, "Recognition", Font_7x10, ST7735_RED, ST7735_BLACK);
 	ST7735_WriteString(0, 4*12, "System", Font_11x18, ST7735_RED, ST7735_BLACK);
 
-	const std::size_t buff_size = 13;
+	const std::size_t buff_size = 20;
 	char  temp_buff[buff_size];
 
 	for(;;){
