@@ -32,6 +32,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -108,7 +109,15 @@ const osThreadAttr_t ppg_sensor_task_attributes = {
   .cb_size = sizeof(ppg_sensor_task_ControlBlock),
   .stack_mem = &ppg_sensor_task_Buffer[0],
   .stack_size = sizeof(ppg_sensor_task_Buffer),
-  .priority = (osPriority_t) osPriorityAboveNormal1,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Save_PPG_to_SD */
+osSemaphoreId_t Save_PPG_to_SDHandle;
+osStaticSemaphoreDef_t Save_PPG_to_SDControlBlock;
+const osSemaphoreAttr_t Save_PPG_to_SD_attributes = {
+  .name = "Save_PPG_to_SD",
+  .cb_mem = &Save_PPG_to_SDControlBlock,
+  .cb_size = sizeof(Save_PPG_to_SDControlBlock),
 };
 /* USER CODE BEGIN PV */
 
@@ -182,6 +191,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of Save_PPG_to_SD */
+  Save_PPG_to_SDHandle = osSemaphoreNew(1, 1, &Save_PPG_to_SD_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -577,6 +590,8 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
   while (1)
   {
   }
@@ -594,6 +609,11 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
+
+	// FIXME Temporary solution
+	// Add USB printing error or SD save depend where is error occurs
+	Error_Handler();
+
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */

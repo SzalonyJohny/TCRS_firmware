@@ -9,6 +9,9 @@
 #include <cmsis_os.h>
 #include "ppg_sensor_task.hpp"
 #include "helper_func.hpp"
+#include <cstdio>
+
+#include "common.hpp"
 
 // MAX3010
 extern I2C_HandleTypeDef hi2c1;
@@ -22,10 +25,12 @@ extern volatile uint32_t BufferHead;
 extern volatile uint32_t BufferTail;
 }
 
-
+// Values to display on LCD
 uint32_t IRv, REDv;
 
-
+// semafor for sd saving data
+buffer_saving_semafor_t buffer_saving_semafor;
+extern osSemaphoreId_t Save_PPG_to_SDHandle;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(PPG_INT_Pin == GPIO_Pin){
@@ -47,18 +52,17 @@ void start_sensor_task([[maybe_unused]] void *argument){
 	assert_param(MAX30102_OK == max30102_init_status);
 
 
-
 	for(;;){
 
+		for(std::size_t i = 0; i < MAX30102_MEASUREMENT_SECONDS+1; ++i){
+			buffer_saving_semafor.ready_to_save[i] = rising_edge_or_overflow <MAX30102_MEASUREMENT_SECONDS+1, MAX30102_FIFO_ALMOST_FULL_SAMPLES+1 >
+													 (BufferHead, (i+1)*MAX30102_SAMPLES_PER_SECOND, i);
+		}
 
 
 		IRv = IrBuffer[BufferHead - 10];
 		REDv = RedBuffer[BufferHead - 10];
 
-		// save first 100 if buf
-		// Buffer head += 18
-		// if na początku
-		// semafor do datasaver task
 
 		Max30102_Task();
 
