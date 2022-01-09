@@ -21,10 +21,14 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usbd_cdc_if.h"
+#include "string.h"
 
+#include <stdio.h>
 #include "ppg_sensor_task.hpp"
 #include "sd_saver_task.hpp"
 #include "display_task.hpp"
@@ -85,11 +89,11 @@ const osThreadAttr_t display_task_attributes = {
   .cb_size = sizeof(display_task_ControlBlock),
   .stack_mem = &display_task_Buffer[0],
   .stack_size = sizeof(display_task_Buffer),
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for sd_saver_task */
 osThreadId_t sd_saver_taskHandle;
-uint32_t sd_saver_task_Buffer[ 2048 ];
+uint32_t sd_saver_task_Buffer[ 4096 ];
 osStaticThreadDef_t sd_saver_task_ControlBlock;
 const osThreadAttr_t sd_saver_task_attributes = {
   .name = "sd_saver_task",
@@ -101,7 +105,7 @@ const osThreadAttr_t sd_saver_task_attributes = {
 };
 /* Definitions for ppg_sensor_task */
 osThreadId_t ppg_sensor_taskHandle;
-uint32_t ppg_sensor_task_Buffer[ 2048 ];
+uint32_t ppg_sensor_task_Buffer[ 4096 ];
 osStaticThreadDef_t ppg_sensor_task_ControlBlock;
 const osThreadAttr_t ppg_sensor_task_attributes = {
   .name = "ppg_sensor_task",
@@ -121,6 +125,9 @@ const osSemaphoreAttr_t Save_PPG_to_SD_attributes = {
 };
 /* USER CODE BEGIN PV */
 
+
+uint8_t USB_CDC_RX_BUFFER[64];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -137,6 +144,14 @@ extern void start_sd_saver_task(void *argument);
 extern void start_sensor_task(void *argument);
 
 /* USER CODE BEGIN PFP */
+
+int _write(int *file, char *ptr, int len){
+	int i =0;
+	for(i =0; i<len; i++){
+		ITM_SendChar((*ptr++));
+	}
+	return len;
+}
 
 /* USER CODE END PFP */
 
@@ -262,16 +277,15 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 100;
+  RCC_OscInitStruct.PLL.PLLN = 96;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 5;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -550,12 +564,16 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
     osDelay(2000);
     HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+    char buff[] = "Witam nadaje TCRS ! \n";
+    CDC_Transmit_FS((uint8_t *)(&buff[0]), (uint16_t)strlen(buff));
   }
   /* USER CODE END 5 */
 }

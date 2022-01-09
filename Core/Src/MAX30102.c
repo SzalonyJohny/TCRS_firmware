@@ -85,6 +85,8 @@ int8_t Sp02IsValid;
 int32_t HeartRate;
 int8_t IsHrValid;
 
+volatile uint8_t interupt_problem_flag;
+
 typedef enum
 {
 	MAX30102_STATE_BEGIN,
@@ -198,10 +200,22 @@ MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t *Status)
 	return MAX30102_OK;
 }
 
-void Max30102_InterruptCallback(void)
+uint8_t Max30102_InterruptCallback(void)
 {
 	uint8_t Status;
-	while(MAX30102_OK != Max30102_ReadInterruptStatus(&Status));
+
+	// FIXME
+	uint8_t counter = 0;
+	while(MAX30102_OK != Max30102_ReadInterruptStatus(&Status)){
+		counter++;
+		if(counter >= 10){
+			interupt_problem_flag = 1;
+			return;
+		}
+	}
+
+
+
 
 	// Almost Full FIFO Interrupt handle
 	if(Status & (1<<INT_A_FULL_BIT))

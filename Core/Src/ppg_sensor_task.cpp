@@ -10,6 +10,7 @@
 #include "ppg_sensor_task.hpp"
 #include "helper_func.hpp"
 #include <cstdio>
+#include <stdio.h>
 
 #include "common.hpp"
 
@@ -23,10 +24,13 @@ extern volatile uint32_t IrBuffer[MAX30102_BUFFER_LENGTH]; //IR LED sensor data
 extern volatile uint32_t RedBuffer[MAX30102_BUFFER_LENGTH];    //Red LED sensor data
 extern volatile uint32_t BufferHead;
 extern volatile uint32_t BufferTail;
+extern volatile uint8_t interupt_problem_flag;
 }
 
 // Values to display on LCD
 uint32_t IRv, REDv;
+
+uint32_t error_count = 0;
 
 // semafor for sd saving data
 buffer_saving_semafor_t buffer_saving_semafor;
@@ -41,7 +45,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 void start_sensor_task([[maybe_unused]] void *argument){
 
-
 	// Turn on Sensor power supply rail
 	HAL_GPIO_WritePin(EN_SENSOR_GPIO_Port, EN_SENSOR_Pin, GPIO_PIN_RESET);
 
@@ -51,6 +54,9 @@ void start_sensor_task([[maybe_unused]] void *argument){
 	auto max30102_init_status = Max30102_Init(&hi2c1);
 	assert_param(MAX30102_OK == max30102_init_status);
 
+	const uint32_t ppg_task_refresh_rate = 50; // in Hz
+	const uint32_t ppg_task_delay = 1000 / ppg_task_refresh_rate;
+	const uint32_t ppg_task_error_delay = 5;
 
 	for(;;){
 
@@ -65,6 +71,13 @@ void start_sensor_task([[maybe_unused]] void *argument){
 			}
 		}
 
+		if(interupt_problem_flag){
+			osDelay(ppg_task_error_delay);
+			Max30102_InterruptCallback();
+			interupt_problem_flag = 0;
+			error_count++;
+		}
+
 		// Variable to LCD display
 		IRv = IrBuffer[BufferHead - 10];
 		REDv = RedBuffer[BufferHead - 10];
@@ -72,7 +85,7 @@ void start_sensor_task([[maybe_unused]] void *argument){
 
 		Max30102_Task();
 
-		osDelay(10);
+		osDelay(ppg_task_delay);
 
 	}
 

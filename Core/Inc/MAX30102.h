@@ -226,7 +226,7 @@ MAX30102_STATUS Max30102_SetIntAmbientLightCancelationOvfEnabled(uint8_t Enable)
 #ifdef MAX30102_USE_INTERNAL_TEMPERATURE
 MAX30102_STATUS Max30102_SetIntInternalTemperatureReadyEnabled(uint8_t Enable);
 #endif
-void Max30102_InterruptCallback(void);
+uint8_t Max30102_InterruptCallback(void);
 //
 //	FIFO Configuration
 //
